@@ -35,71 +35,46 @@ async function login (page) {
 
   await page.waitForSelector('#header > header > nav > ul > li:nth-child(2) > a');
   await page.click('#header > header > nav > ul > li:nth-child(2) > a');
-
-  /*
-  {
-    brand: {
-      name: 'Volkswagen',
-      value: 'vw',
-
-      family: {
-        name: 'GOL',
-        value: 'f-GOL',
-
-        version: {
-          name: 'GOL 1.0 MPI (5U7TA4-2)',
-          value: 'v-5U7TA4-2-2022',
-        }
-
-        version: {
-          name: 'GOL 1.6 (5U7TE4-2)',
-          value: 'v-5U7TE4-2-2022',
-        }
-
-        version: {
-          name: 'GOL 1.6 MSI (5U7TS2-2)',
-          value: 'v-5U7TS2-2-2022',
-        }
-      }
-
-      family: {
-        name: 'GOL',
-        value: 'f-GOL',
-
-        version: {
-          name: 'GOL 1.0 MPI (5U7TA4-2)',
-          value: 'v-5U7TA4-2-2022',
-        }
-
-        version: {
-          name: 'GOL 1.6 (5U7TE4-2)',
-          value: 'v-5U7TE4-2-2022',
-        }
-
-        version: {
-          name: 'GOL 1.6 MSI (5U7TS2-2)',
-          value: 'v-5U7TS2-2-2022',
-        }
-      }
-    }
-  }
-  */
   
-  
+  // Seletores de filtro
   await page.waitForSelector('#muda_marca > option');
   const changeBrandsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), element => element.textContent));
   const changeBrandsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), element => element.value));
-  console.log(changeBrandsName, changeBrandsValue);
+  //console.log(changeBrandsName, changeBrandsValue);
 
   await page.waitForSelector('#muda_familia > option');
   const familiesName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), element => element.textContent));
   const familiesValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), element => element.value));
-  console.log(familiesName, familiesValue);
+  //console.log(familiesName, familiesValue);
 
-  await page.waitForSelector('#muda_familia > option');
+  await page.waitForSelector('#muda_versao > option');
   const versionsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), element => element.textContent));
   const versionsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), element => element.value));
-  console.log(versionsName, versionsValue);
+  //console.log(versionsName, versionsValue);
+
+  // Nome
+  await page.waitForSelector('#formConfig > div.veiculo > h2');
+  const carTitle = await page.evaluate(() => document.querySelectorAll('#formConfig > div.veiculo > h2'), element => element.textContent);
+  //const carTitleValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), element => element.value));
+  //console.log(carTitle);
+
+  // Cores e preços adicionais
+  await page.waitForSelector('#pintura > label');
+  const carPainting = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), element => element.textContent));
+  //const carPaintingValue = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura'), element => element.name));
+  //console.log(carPainting);
+
+  // Descontos
+  await page.waitForSelector('#desconto_faixas > option');
+  const discount = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), element => element.textContent));
+  const discountValue = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), element => element.value));
+  //console.log(discount, discountValue);
+
+  // Preço público
+  await page.waitForSelector('#formConfig > ul.precos > li.preco_base > span');
+  let publicPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#formConfig > ul.precos > li.preco_base > span'), element => element.textContent.slice(3).replace(".", "").replace(",", ".")));
+  publicPrice = parseFloat(publicPrice);
+  console.log(publicPrice);
   
   console.log('Finalizando');
 })();
