@@ -15,7 +15,7 @@
 						paintingName: ['Branco Cristal (Cor Sólida)', 'Cinza Platinum (Cor Metálica)'],
 						paintingPrice: [0, 1610],
 						discountBands: ['Frostistas', 'OUTROS'],
-						discountPercentage: ['0', '10']
+						discountPercentages: [0, 10]
 					},
 				]
 			},
