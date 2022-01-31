@@ -16,8 +16,8 @@ async function login (page) {
 
   const selector = 'body > p:nth-child(1) > strong';
   await page.waitForSelector(selector);
-  let element = await page.$(selector);
-  let warning = await page.evaluate(el => el.textContent, element);
+  let el = await page.$(selector);
+  let warning = await page.evaluate(el => el.textContent, el);
   
   await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -36,23 +36,21 @@ async function login (page) {
   await page.waitForSelector('#header > header > nav > ul > li:nth-child(2) > a');
   await page.click('#header > header > nav > ul > li:nth-child(2) > a');
   
-  /*
   // Seletores de filtro
   await page.waitForSelector('#muda_marca > option');
-  const changeBrandsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), element => element.textContent));
-  const changeBrandsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), element => element.value));
+  const changeBrandsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), el => el.textContent));
+  const changeBrandsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), el => el.value));
   //console.log(changeBrandsName, changeBrandsValue);
 
   await page.waitForSelector('#muda_familia > option');
-  const familiesName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), element => element.textContent));
-  const familiesValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), element => element.value));
+  const familiesName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), el => el.textContent));
+  const familiesValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), el => el.value));
   //console.log(familiesName, familiesValue);
 
   await page.waitForSelector('#muda_versao > option');
-  const versionsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), element => element.textContent));
-  const versionsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), element => element.value));
+  const versionsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), el => el.textContent));
+  const versionsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), el => el.value));
   //console.log(versionsName, versionsValue);
-  */
 
   // Cabeçalho - OK
   await page.waitForSelector('#formConfig > div.veiculo > h2');
@@ -68,7 +66,7 @@ async function login (page) {
 
   // Preços adicionais de cores - OK
   await page.waitForSelector('#pintura > label');
-  const paintingName = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), element => element.textContent));
+  const paintingName = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), el => el.textContent));
   for (let i = 0; i < paintingName.length; i++) {
     indexSlice = paintingName[i].lastIndexOf('R$');
     paintingName[i] = paintingName[i].slice(0, indexSlice);
@@ -82,7 +80,7 @@ async function login (page) {
     paintingName[i] = `${startName} - ${endName}`;
   }
 
-  const paintingPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), element => element.getAttribute('name')));
+  const paintingPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), el => el.getAttribute('name')));
   for (let i = 0; i < paintingPrice.length; i++) {
     indexSlice = paintingPrice[i].lastIndexOf(';');
     paintingPrice[i] = parseFloat(paintingPrice[i].slice(indexSlice + 1));
@@ -92,14 +90,14 @@ async function login (page) {
 
   // Preço público - OK
   await page.waitForSelector('#formConfig > ul.precos > li.preco_base > span');
-  let publicPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#formConfig > ul.precos > li.preco_base > span'), element => element.textContent.slice(3).replace(".", "").replace(",", ".")));
+  let publicPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#formConfig > ul.precos > li.preco_base > span'), el => el.textContent.slice(3).replace(".", "").replace(",", ".")));
   publicPrice = parseFloat(publicPrice);
   console.log(`Public Price: ${publicPrice}`);
   
   // Descontos - OK
   await page.waitForSelector('#desconto_faixas > option');
-  const discountBands = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), element => element.textContent));
-  const discountPercentages = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), element => parseFloat(element.getAttribute('mytaxa'))));
+  const discountBands = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), el => el.textContent));
+  const discountPercentages = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), el => parseFloat(el.getAttribute('mytaxa'))));
   console.log(`Discount Bands: ${discountBands}`);
   console.log(`Discount Percentages: ${discountPercentages}`);
 
