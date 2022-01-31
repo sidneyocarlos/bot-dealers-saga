@@ -1,6 +1,5 @@
 require('dotenv').config();
 const puppeteer = require('puppeteer');
-const SITE_URL = 'https://dealers.vendascorporativas.com.br';
 
 const options = {
   headless: false,
@@ -9,14 +8,14 @@ const options = {
 }
 
 async function login (page) {
-  await page.goto(SITE_URL);
+  await page.goto('https://dealers.vendascorporativas.com.br');
 	await page.type('#usuario_codigo', process.env.LOGIN);
 	await page.type('[type="password"]', process.env.PASSWORD);	
 	await page.click('#btSubmit');
 
-  const selector = 'body > p:nth-child(1) > strong';
-  await page.waitForSelector(selector);
-  let el = await page.$(selector);
+  const warningPath = 'body > p:nth-child(1) > strong';
+  await page.waitForSelector(warningPath);
+  let el = await page.$(warningPath);
   let warning = await page.evaluate(el => el.textContent, el);
   
   await new Promise(resolve => setTimeout(resolve, 500));
@@ -36,70 +35,85 @@ async function login (page) {
   await page.waitForSelector('#header > header > nav > ul > li:nth-child(2) > a');
   await page.click('#header > header > nav > ul > li:nth-child(2) > a');
   
-  // Seletores de filtro
+  // Seleciona Marca
   await page.waitForSelector('#muda_marca > option');
   const changeBrandsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), el => el.textContent));
   const changeBrandsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_marca > option'), el => el.value));
-  //console.log(changeBrandsName, changeBrandsValue);
+  console.log(changeBrandsName, changeBrandsValue);  
 
-  await page.waitForSelector('#muda_familia > option');
-  const familiesName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), el => el.textContent));
-  const familiesValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), el => el.value));
-  //console.log(familiesName, familiesValue);
+  for (let i = 0; i < changeBrandsValue.length; i++) {
+    // Navega pelas marcas
+    await page.waitForSelector('#muda_marca > option');
+    await page.select('select[name="muda_marca"]', changeBrandsValue[i]);
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-  await page.waitForSelector('#muda_versao > option');
-  const versionsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), el => el.textContent));
-  const versionsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), el => el.value));
-  //console.log(versionsName, versionsValue);
-
-  // Cabeçalho - OK
-  await page.waitForSelector('#formConfig > div.veiculo > h2');
-  let versionName = await page.$eval('#formConfig > div.veiculo > h2', el => el.textContent);
-  let versionNameSlicePrice = versionName.indexOf('R$');
-  versionName = versionName.slice(0, versionNameSlicePrice).replace('\n', ' ').replace('  ', ' ');
-
-  await page.waitForSelector('#formConfig > div.veiculo > h2 > span.codigo');
-  const versionCode = await page.$eval('#formConfig > div.veiculo > h2 > span.codigo', el => el.textContent.replace('(', '').replace(')', ''));
-
-  const versionYear = parseInt(versionName.slice(-4));
-  console.log(`Nome: ${versionName} | Code: ${versionCode} | Year: ${versionYear}`);
-
-  // Preços adicionais de cores - OK
-  await page.waitForSelector('#pintura > label');
-  const paintingName = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), el => el.textContent));
-  for (let i = 0; i < paintingName.length; i++) {
-    indexSlice = paintingName[i].lastIndexOf('R$');
-    paintingName[i] = paintingName[i].slice(0, indexSlice);
-
-    indexSlice = paintingName[i].lastIndexOf(')');
-    startName = paintingName[i].slice(indexSlice + 1);
+    // Seleciona família
+    await page.waitForSelector('#muda_familia > option');
+    const familiesName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), el => el.textContent));
+    const familiesValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_familia > option'), el => el.value));
+    console.log(familiesName, familiesValue);
     
-    indexSlice = paintingName[i].lastIndexOf(')');
-    endName = paintingName[i].slice(0, indexSlice + 1);
-    
-    paintingName[i] = `${startName} - ${endName}`;
-  }
+    for (let i = 0; i < familiesValue.length; i++) {
+      // Navega pelas famílias
+      await page.waitForSelector('#muda_familia > option');
+      await page.select('select[name="muda_familia"]', familiesValue[i]);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-  const paintingPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), el => el.getAttribute('name')));
-  for (let i = 0; i < paintingPrice.length; i++) {
-    indexSlice = paintingPrice[i].lastIndexOf(';');
-    paintingPrice[i] = parseFloat(paintingPrice[i].slice(indexSlice + 1));
-  }
-  console.log(`Paintings: ${paintingName}`);
-  console.log(`Painting Prices: ${paintingPrice}`);
+      // Seleciona Versão
+      await page.waitForSelector('#muda_versao > option');
+      const versionsName = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), el => el.textContent));
+      const versionsValue = await page.evaluate(() => Array.from(document.querySelectorAll('#muda_versao > option'), el => el.value));
+      console.log(versionsName, versionsValue);
+      
+      for (let i = 0; i < versionsValue.length; i++) {
+        // Navega pelas versões
+        await page.waitForSelector('#muda_versao > option');
+        await page.select('select[name="muda_versao"]', versionsValue[i]);
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-  // Preço público - OK
-  await page.waitForSelector('#formConfig > ul.precos > li.preco_base > span');
-  let publicPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#formConfig > ul.precos > li.preco_base > span'), el => el.textContent.slice(3).replace(".", "").replace(",", ".")));
-  publicPrice = parseFloat(publicPrice);
-  console.log(`Public Price: ${publicPrice}`);
-  
-  // Descontos - OK
-  await page.waitForSelector('#desconto_faixas > option');
-  const discountBands = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), el => el.textContent));
-  const discountPercentages = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), el => parseFloat(el.getAttribute('mytaxa'))));
-  console.log(`Discount Bands: ${discountBands}`);
-  console.log(`Discount Percentages: ${discountPercentages}`);
+        // Cabeçalho - OK
+        await page.waitForSelector('#formConfig > div.veiculo > h2');
+        let versionName = await page.$eval('#formConfig > div.veiculo > h2', el => el.textContent);
+        let versionNameSlicePrice = versionName.indexOf('R$');
+        versionName = versionName.slice(0, versionNameSlicePrice).replace('\n', ' ').replace('  ', ' ');
+      
+        await page.waitForSelector('#formConfig > div.veiculo > h2 > span.codigo');
+        const versionCode = await page.$eval('#formConfig > div.veiculo > h2 > span.codigo', el => el.textContent.replace('(', '').replace(')', ''));
+      
+        const versionYear = parseInt(versionName.slice(-4));
+        console.log(`Nome: ${versionName} | Code: ${versionCode} | Year: ${versionYear}`);
+      
+        // Preços adicionais de cores - OK
+        await page.waitForSelector('#pintura > label');
+        const paintingName = await page.evaluate(() => Array.from(document.querySelectorAll('#pintura > label'), el => el.textContent));
+        const paintingPrice = [...paintingName];
+        for (let i = 0; i < paintingName.length; i++) {
+          indexSlice = paintingName[i].lastIndexOf('R$');
+          paintingName[i] = paintingName[i].slice(0, indexSlice);
+        }
+      
+        for (let i = 0; i < paintingPrice.length; i++) {
+          indexSlice = paintingPrice[i].lastIndexOf('R$');
+          paintingPrice[i] = parseFloat(paintingPrice[i].slice(indexSlice).replace('R$ ', '').replace('.', '').replace(',', '.'));
+        }
+        console.log(`Paintings: ${paintingName}`);
+        console.log(`Painting Prices: ${paintingPrice}`);
+      
+        // Preço público - OK
+        await page.waitForSelector('#formConfig > ul.precos > li.preco_base > span');
+        let publicPrice = await page.evaluate(() => Array.from(document.querySelectorAll('#formConfig > ul.precos > li.preco_base > span'), el => el.textContent.slice(3).replace(".", "").replace(",", ".")));
+        publicPrice = parseFloat(publicPrice);
+        console.log(`Public Price: ${publicPrice}`);
+        
+        // Descontos - OK
+        await page.waitForSelector('#desconto_faixas > option');
+        const discountBands = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), el => el.textContent));
+        const discountPercentages = await page.evaluate(() => Array.from(document.querySelectorAll('#desconto_faixas > option'), el => parseFloat(el.getAttribute('mytaxa'))));
+        console.log(`Discount Bands: ${discountBands}`);
+        console.log(`Discount Percentages: ${discountPercentages}`);
+      }
+    }    
+  }
 
   console.log('Finalizando');
 })();
